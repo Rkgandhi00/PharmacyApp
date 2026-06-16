@@ -1,6 +1,9 @@
 # ABC Pharmacy — Medicine Management System
 
-A lightweight web-based pharmacy management system built with **ASP.NET Core (.NET 9)** and **Vanilla JS / Bootstrap 5**. All data is stored locally in JSON files — no database required.
+A lightweight web-based pharmacy management system built with **ASP.NET Core (.NET 10)** and **Vanilla JS / Bootstrap 5**. All data is stored locally in JSON files — no database required.
+
+**Non-coders:** [Download the latest release](https://github.com/Rkgandhi00/PharmacyApp/releases/latest) — unzip and double-click to run, no installation needed.  
+**Coders:** Clone this repo and run `dotnet run` inside `PharmacyApp/`.
 
 ---
 
