@@ -2,79 +2,148 @@
 
 A lightweight web-based pharmacy management system built with **ASP.NET Core (.NET 10)** and **Vanilla JS / Bootstrap 5**. All data is stored locally in JSON files — no database required.
 
-**Non-coders:** [Download the latest release](https://github.com/Rkgandhi00/PharmacyApp/releases/latest) — unzip and double-click to run, no installation needed.  
-**Coders:** Clone this repo and run `dotnet run` inside `PharmacyApp/`.
+| | |
+|---|---|
+| **Non-coders** | [⬇ Download latest release](https://github.com/Rkgandhi00/PharmacyApp/releases/latest) — unzip and double-click, no installation needed |
+| **Coders** | `git clone https://github.com/Rkgandhi00/PharmacyApp.git` then `dotnet run --project PharmacyApp` |
 
 ---
 
 ## Features
 
-- Inventory management — add, edit, restock, and delete medicines
-- Sales recording — record sales with automatic stock deduction
-- Status tracking — colour-coded rows for expiring, low-stock, and out-of-stock items
-- Filters & search — filter by status pill + live search by name or brand
-- Sortable columns — click any column header to sort ascending/descending
-- Pagination — 10 rows per page
-- Today's sales strip — click the "Sales Today" card to expand a live card view
-- Config-driven — currency, low-stock threshold, and expiry warning window all in `appsettings.json`
+- **Inventory** — add, edit, restock, and delete medicines
+- **Sales** — record sales with automatic stock deduction and audit trail
+- **Status tracking** — colour-coded rows: expiring soon, low stock, out of stock
+- **Search & filters** — live search by name or brand; filter pills by status
+- **Sortable columns** — click any column header to sort ascending / descending
+- **Pagination** — 10 rows per page
+- **Today's sales** — click the "Sales Today" card to expand a live card strip
+- **Config-driven** — currency symbol, low-stock threshold, expiry warning, and locale all live in `appsettings.json` with no code changes needed
+- **Duplicate warning** — soft frontend alert when the same medicine + brand already exists (different batches with different expiry / price are allowed)
+- **Input validation** — required-field highlighting, save button disabled until form is complete, test-value guard on the backend
 
 ---
 
 ## Tech Stack
 
-| Layer       | Technology                              |
-|-------------|-----------------------------------------|
-| Backend API | ASP.NET Core 9 Web API                  |
-| Frontend    | Vanilla JS, Bootstrap 5, Bootstrap Icons |
-| Data store  | JSON files (`Data/`)                    |
-| Tests       | xUnit, Moq                              |
+| Layer       | Technology                                      |
+|-------------|-------------------------------------------------|
+| Backend API | ASP.NET Core 10 Web API (Minimal + Controllers) |
+| Frontend    | Vanilla JS (ES2022), Bootstrap 5.3, Bootstrap Icons 1.11 |
+| Persistence | JSON flat files (`Data/`) — no database         |
+| DI lifetime | Singleton throughout (file-lock shared across all services) |
+| Tests       | xUnit 2.9.3 · Moq 4.20.72 · 46 tests           |
+| SDK pin     | .NET 10.0.301 (`global.json`, rolls forward to latest minor) |
 
 ---
 
-## Prerequisites (to run from source)
+## Prerequisites
 
-- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
-- Any modern browser (Chrome, Edge, Firefox)
+### To run the app (non-coders)
+No installation needed — [download the release zip](https://github.com/Rkgandhi00/PharmacyApp/releases/latest).
+
+### To run from source (developers)
+| Tool | Version | Download |
+|------|---------|----------|
+| .NET SDK | 10.0+ | [dotnet.microsoft.com](https://dotnet.microsoft.com/download/dotnet/10.0) |
+| Visual Studio | 2022 v17.14+ | Required for .NET 10 support |
+| — or VS Code | any | with C# Dev Kit extension |
+| Browser | Chrome / Edge / Firefox | — |
+
+> **Visual Studio note:** VS 2022 v17.14 or later is required. Older versions bundle an SDK that predates .NET 10 and will show an SDK-not-found error on load.
 
 ---
 
 ## Solution Structure
 
 ```
-D:\Projects\
-├── PharmacyApp.sln           # Open this in Visual Studio or Rider
-├── PharmacyApp\              # Web API + frontend
-└── PharmacyApp.Tests\        # xUnit test project
+PharmacyApp/                        ← git repo root / solution root
+├── PharmacyApp.sln                 ← open this in Visual Studio or Rider
+├── global.json                     ← pins SDK to .NET 10
+├── .gitignore
+├── .gitattributes
+├── README.md
+│
+├── PharmacyApp/                    ← web API project
+│   ├── PharmacyApp.csproj
+│   ├── Program.cs                  ← DI wiring + /api/config endpoint
+│   ├── appsettings.json            ← currency, thresholds, locale, port
+│   ├── Controllers/
+│   │   ├── MedicinesController.cs
+│   │   └── SalesController.cs
+│   ├── Data/                       ← JSON data files (auto-created on first run)
+│   │   ├── medicines.json
+│   │   ├── sales.json
+│   │   └── stock-transactions.json
+│   ├── Infrastructure/
+│   │   ├── FileStoreLock.cs        ← shared reentrant Monitor for thread safety
+│   │   ├── JsonOptions.cs
+│   │   └── NotTestValueAttribute.cs
+│   ├── Models/
+│   │   ├── Medicine.cs
+│   │   ├── Sale.cs                 ← immutable; name+price snapshotted at sale time
+│   │   ├── StockTransaction.cs     ← audit log entry
+│   │   └── DTOs/
+│   ├── Repositories/
+│   │   ├── IMedicineRepository.cs
+│   │   ├── ISaleRepository.cs
+│   │   ├── IStockTransactionRepository.cs
+│   │   └── Json/
+│   │       ├── JsonRepositoryBase.cs   ← shared file I/O + lock wiring
+│   │       ├── JsonMedicineRepository.cs
+│   │       ├── JsonSaleRepository.cs
+│   │       └── JsonStockTransactionRepository.cs
+│   ├── Services/
+│   │   ├── IStockService.cs
+│   │   └── StockService.cs         ← atomic sale + restock (lock held across repos)
+│   └── wwwroot/
+│       ├── index.html
+│       └── app.js
+│
+└── PharmacyApp.Tests/              ← test project (46 tests)
+    ├── PharmacyApp.Tests.csproj
+    ├── Controllers/
+    │   ├── MedicinesControllerTests.cs
+    │   └── SalesControllerTests.cs
+    ├── Repositories/
+    │   └── JsonMedicineRepositoryTests.cs  ← integration tests using temp dir
+    └── Services/
+        └── StockServiceTests.cs
 ```
-
-Open `PharmacyApp.sln` in Visual Studio / Rider to get both projects loaded at once.
 
 ---
 
 ## Running from Source
 
 ```powershell
-# from D:\Projects\PharmacyApp
-dotnet run
+# 1. Clone
+git clone https://github.com/Rkgandhi00/PharmacyApp.git
+cd PharmacyApp
+
+# 2. Run the app
+dotnet run --project PharmacyApp
+
+# 3. Open in browser
+# http://localhost:5000
 ```
 
-Open **http://localhost:5000** in your browser.
-
-### Running the tests
+### Run all tests
 
 ```powershell
-# from D:\Projects  (runs all projects in the solution)
 dotnet test PharmacyApp.sln
 ```
 
+Expected output: `Passed! — Failed: 0, Passed: 46`
+
 ---
 
-## Configuration (`appsettings.json`)
+## Configuration
 
-No code changes are needed to customise the app — edit these values:
+All business values live in [`PharmacyApp/appsettings.json`](PharmacyApp/appsettings.json) — no code changes needed:
 
 ```json
 {
+  "Urls": "http://0.0.0.0:5000",
   "Currency": {
     "Symbol": "₹",
     "Code": "INR"
@@ -87,116 +156,69 @@ No code changes are needed to customise the app — edit these values:
 }
 ```
 
-| Setting                 | Default | Description                                              |
-|-------------------------|---------|----------------------------------------------------------|
-| `Currency.Symbol`       | `₹`     | Symbol shown next to all prices                          |
-| `App.ExpiryWarningDays` | `30`    | Days before expiry to flag a medicine as "Expiring Soon" |
-| `App.LowStockThreshold` | `10`    | Quantity below which a medicine is flagged "Low Stock"   |
-| `App.DateLocale`        | `en-IN` | Date display locale (`en-GB`, `en-US`, etc.)             |
+| Setting | Default | Description |
+|---|---|---|
+| `Urls` | `http://0.0.0.0:5000` | Port the app listens on |
+| `Currency.Symbol` | `₹` | Symbol shown next to all prices |
+| `Currency.Code` | `INR` | Currency code (display only) |
+| `App.ExpiryWarningDays` | `30` | Days before expiry to flag "Expiring Soon" |
+| `App.LowStockThreshold` | `10` | Quantity below which a medicine shows "Low Stock" |
+| `App.DateLocale` | `en-IN` | Date format locale — `en-GB`, `en-US`, etc. |
 
 ---
 
-## Project Structure
+## API Reference
 
-```
-PharmacyApp/
-├── Controllers/              # REST API endpoints (medicines, sales)
-├── Data/                     # JSON data files — medicines, sales, stock-transactions
-├── Infrastructure/           # FileStoreLock, JsonOptions, NotTestValueAttribute
-├── Models/                   # Entity models + request DTOs
-├── Repositories/             # Interfaces + JSON file implementations
-│   └── Json/
-│       ├── JsonRepositoryBase.cs   # Shared file I/O + lock wiring
-│       ├── JsonMedicineRepository.cs
-│       ├── JsonSaleRepository.cs
-│       └── JsonStockTransactionRepository.cs
-├── Services/                 # StockService (sale recording, restocking)
-├── wwwroot/                  # index.html + app.js (single-page frontend)
-├── appsettings.json          # All configurable business values
-└── Program.cs                # DI registration + minimal API routes
-
-PharmacyApp.Tests/
-├── Controllers/              # Controller unit tests
-├── Repositories/             # Repository integration tests (temp-file based)
-└── Services/                 # StockService unit tests
-```
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/medicines` | List all medicines (optional `?search=`) |
+| `POST` | `/api/medicines` | Add a new medicine |
+| `PUT` | `/api/medicines/{id}` | Update medicine fields |
+| `DELETE` | `/api/medicines/{id}` | Delete a medicine |
+| `POST` | `/api/medicines/{id}/restock` | Add stock units |
+| `GET` | `/api/sales` | List all sales |
+| `POST` | `/api/sales` | Record a sale (deducts stock atomically) |
+| `GET` | `/api/config` | Frontend config payload (currency, thresholds) |
 
 ---
 
-## API Endpoints
+## Sharing & Distribution
 
-| Method | Endpoint                        | Description                        |
-|--------|---------------------------------|------------------------------------|
-| GET    | `/api/medicines`                | List medicines (optional `?search=`) |
-| POST   | `/api/medicines`                | Add a new medicine                 |
-| PUT    | `/api/medicines/{id}`           | Update a medicine                  |
-| DELETE | `/api/medicines/{id}`           | Delete a medicine                  |
-| POST   | `/api/medicines/{id}/restock`   | Add stock to a medicine            |
-| GET    | `/api/sales`                    | List all sales                     |
-| POST   | `/api/sales`                    | Record a sale                      |
-| GET    | `/api/config`                   | Frontend config (currency, thresholds) |
+### Non-coders — GitHub Release (recommended)
+
+Go to [Releases](https://github.com/Rkgandhi00/PharmacyApp/releases/latest), download `PharmacyApp-v1.0-win-x64.zip`.
+
+1. Unzip anywhere (e.g. Desktop)
+2. Double-click **PharmacyApp.exe**
+3. Wait for: `Now listening on: http://0.0.0.0:5000`
+4. Open **http://localhost:5000** in your browser
+5. Close the terminal window to stop the app
+
+> Self-contained — no .NET runtime installation required. Windows 10/11 x64 only.
 
 ---
 
-## Distribution — How to Share / Email
+### Developers — build your own release package
 
-### Option 1 — Self-contained EXE (recommended)
+**Self-contained single EXE** (~100 MB, no .NET required on target machine):
 
-This bundles .NET inside the EXE so the recipient does **not** need anything installed.
-
-**Step 1 — publish:**
 ```powershell
-dotnet publish D:\Projects\PharmacyApp -r win-x64 --self-contained true /p:PublishSingleFile=true -c Release -o D:\Projects\PharmacyApp\publish
+dotnet publish PharmacyApp -r win-x64 --self-contained true /p:PublishSingleFile=true -c Release -o publish
 ```
 
-**Step 2 — zip the `publish\` folder** using File Explorer (right-click → Send to → Compressed folder) or 7-Zip.
+**Framework-dependent** (~15 MB, requires [.NET 10 Runtime](https://dotnet.microsoft.com/download/dotnet/10.0) on target machine):
 
-**Step 3 — email the zip.**
-
-**What the recipient does:**
-1. Unzip the folder anywhere (e.g. Desktop)
-2. Double-click `PharmacyApp.exe`
-3. A terminal window opens — wait until it shows `Now listening on: http://0.0.0.0:5000`
-4. Open a browser and go to **http://localhost:5000**
-5. To close the app, close the terminal window
-
-> The EXE is approximately 60–80 MB (all .NET libraries are bundled inside it).
-
----
-
-### Option 2 — Smaller package (requires .NET 9 Runtime on recipient's machine)
-
-**Step 1 — publish:**
 ```powershell
-dotnet publish D:\Projects\PharmacyApp -c Release -o D:\Projects\PharmacyApp\publish
+dotnet publish PharmacyApp -c Release -o publish
 ```
 
-**Step 2 — zip and send the `publish\` folder.**
-
-**What the recipient does:**
-1. Install [.NET 9 Runtime](https://dotnet.microsoft.com/download/dotnet/9.0) (one-time, ~50 MB)
-2. Unzip the folder
-3. Double-click `PharmacyApp.exe` (or run `dotnet PharmacyApp.dll` in a terminal)
-4. Open **http://localhost:5000**
-
-> The publish folder is approximately 10–15 MB zipped.
-
----
-
-### Option 3 — Share source code (for developers)
-
-Zip the project folder, **excluding** the `bin\` and `obj\` build artifact folders before compressing.
-
-**What the recipient does:**
-1. Install [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
-2. Unzip the folder
-3. Open a terminal in the `PharmacyApp` folder and run `dotnet run`
-4. Open **http://localhost:5000**
+Zip the `publish/` folder and share. The recipient follows the same steps as above.
 
 ---
 
 ## Notes
 
-- All data is saved in the `Data\` folder next to the EXE as plain JSON files. To reset/wipe all data, delete the contents of those files (keep the files, just clear them to `[]`).
-- The port can be changed in `appsettings.json` under the `"Urls"` key.
-- The app only listens locally — it is not exposed to the internet.
+- **Data files** are plain JSON in `Data/` next to the EXE. To reset, clear each file to `[]`.
+- **Thread safety** — a single `FileStoreLock` (shared Monitor) ensures all repositories and `StockService` are mutually exclusive. Safe for concurrent HTTP requests.
+- **No external dependencies** — no database, no cloud services, no message queue. The app runs entirely offline.
+- The app listens on localhost only and is **not exposed to the internet**.
