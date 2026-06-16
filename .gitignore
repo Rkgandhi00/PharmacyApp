@@ -1,0 +1,25 @@
+## Build output
+bin/
+obj/
+publish/
+
+## IDE files
+.vs/
+*.user
+*.suo
+.idea/
+*.swp
+
+## OS
+.DS_Store
+Thumbs.db
+
+## Runtime secrets / local config
+appsettings.Development.json
+secrets.json
+
+## Test results
+TestResults/
+coverage/
+*.coverage
+*.coveragexml

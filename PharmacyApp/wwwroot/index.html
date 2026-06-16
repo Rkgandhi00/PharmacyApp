@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ABC Pharmacy</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { background: #f1f5f9; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #1e293b; margin: 0; }
+
+    /* ── Header ── */
+    .app-header {
+      background: #fff;
+      border-bottom: 2px solid #2563eb;
+      padding: 0 24px;
+      height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 200;
+      box-shadow: 0 1px 8px rgba(0,0,0,.07);
+    }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand-icon {
+      width: 38px; height: 38px;
+      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 1.15rem;
+    }
+    .brand-name { font-size: 1.05rem; font-weight: 700; color: #1e293b; }
+    .brand-sub  { font-size: .72rem; color: #64748b; display: block; margin-top: -2px; }
+
+    .nav-pills-custom { display: flex; gap: 4px; }
+    .npill {
+      background: none; border: none; cursor: pointer;
+      padding: 6px 16px; border-radius: 8px;
+      font-size: .88rem; font-weight: 500; color: #64748b;
+      display: flex; align-items: center; gap: 6px;
+      transition: background .12s, color .12s;
+    }
+    .npill:hover { background: #f1f5f9; color: #1e293b; }
+    .npill.active { background: #eff6ff; color: #2563eb; }
+
+    /* ── Stat cards ── */
+    .stat-card {
+      background: #fff; border-radius: 12px; padding: 16px 18px;
+      display: flex; align-items: center; gap: 14px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+      border: 1px solid #f1f5f9;
+    }
+    .stat-card-clickable {
+      cursor: pointer; transition: box-shadow .15s, border-color .15s;
+    }
+    .stat-card-clickable:hover { border-color: #86efac; box-shadow: 0 2px 8px rgba(22,163,74,.12); }
+    .stat-card-clickable.active { border-color: #16a34a; background: #f0fdf4; }
+    .stat-icon {
+      width: 44px; height: 44px; border-radius: 10px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+    }
+    .si-blue   { background: #eff6ff; color: #2563eb; }
+    .si-red    { background: #fef2f2; color: #dc2626; }
+    .si-amber  { background: #fffbeb; color: #d97706; }
+    .si-green  { background: #f0fdf4; color: #16a34a; }
+    .si-purple { background: #faf5ff; color: #7c3aed; }
+    .stat-val  { font-size: 1.55rem; font-weight: 700; line-height: 1; color: #1e293b; }
+    .stat-lbl  { font-size: .75rem; color: #64748b; margin-top: 2px; }
+
+    /* ── Toolbar ── */
+    .toolbar {
+      background: #fff; border-radius: 12px; padding: 10px 14px;
+      display: flex; align-items: center; gap: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    }
+    .search-wrap { position: relative; flex: 1; }
+    .search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: #94a3b8; pointer-events: none; }
+    .search-input {
+      width: 100%; padding: 8px 36px 8px 34px;
+      border: 1.5px solid #e2e8f0; border-radius: 8px;
+      font-size: .9rem; background: #f8fafc; outline: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .search-input:focus { border-color: #2563eb; background: #fff; box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
+    .search-input::placeholder { color: #94a3b8; }
+    .search-clear {
+      position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 1rem; padding: 2px;
+      line-height: 1; transition: color .12s;
+    }
+    .search-clear:hover { color: #475569; }
+
+    .legend { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+    .legend-item { display: flex; align-items: center; gap: 5px; font-size: .78rem; color: #64748b; white-space: nowrap; }
+    .ldot { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+    .ldot-red   { background: #fecaca; border: 1.5px solid #f87171; }
+    .ldot-amber { background: #fde68a; border: 1.5px solid #fbbf24; }
+
+    /* ── Table card ── */
+    .tbl-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,.06); overflow: hidden; }
+    .tbl-card .table { margin: 0; }
+    .tbl-card thead th {
+      background: #f8fafc; font-size: .75rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: .07em; color: #64748b;
+      padding: 11px 16px; border-bottom: 2px solid #e2e8f0; border-top: none; white-space: nowrap;
+    }
+    .tbl-card tbody td { padding: 11px 16px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; font-size: .9rem; }
+    .tbl-card tbody tr:last-child td { border-bottom: none; }
+    .tbl-card tbody tr:hover td { background: #fafafa; }
+
+    tr.r-expiry     { background: #fff5f5 !important; }
+    tr.r-expiry:hover td { background: #fee2e2 !important; }
+    tr.r-stock      { background: #fffef0 !important; }
+    tr.r-stock:hover td  { background: #fef9c3 !important; }
+    tr.r-out        { background: #f8fafc !important; opacity: .75; }
+    tr.r-out:hover td    { background: #f1f5f9 !important; }
+    tr.r-ok:hover td     { background: #dcfce7 !important; }
+
+    .med-name  { font-weight: 600; color: #1e293b; }
+    .b-expiry  { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; font-size: .72rem; padding: 2px 8px; border-radius: 20px; white-space: nowrap; }
+    .b-stock   { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; font-size: .72rem; padding: 2px 8px; border-radius: 20px; white-space: nowrap; }
+    .b-ok      { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; font-size: .72rem; padding: 2px 8px; border-radius: 20px; white-space: nowrap; }
+    .b-out     { background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; font-size: .72rem; padding: 2px 8px; border-radius: 20px; white-space: nowrap; }
+
+    .filter-bar { display: flex; flex-wrap: wrap; gap: 6px; }
+    .fpill {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 12px; border-radius: 20px; font-size: .78rem; font-weight: 500;
+      border: 1.5px solid #e2e8f0; background: #f8fafc; color: #475569;
+      cursor: pointer; transition: all .15s;
+    }
+    .fpill:hover                    { border-color: #94a3b8; background: #f1f5f9; }
+    .fpill.active                   { border-color: #6366f1; background: #eef2ff; color: #4338ca; }
+    .fpill-ok.active                { border-color: #16a34a; background: #f0fdf4; color: #15803d; }
+    .fpill-stock.active             { border-color: #d97706; background: #fffbeb; color: #b45309; }
+    .fpill-expiry.active            { border-color: #dc2626; background: #fef2f2; color: #b91c1c; }
+    .fpill-out.active               { border-color: #94a3b8; background: #f1f5f9; color: #475569; }
+
+    .today-sales-scroll {
+      display: flex; gap: 12px; overflow-x: auto; padding-bottom: 6px;
+      scrollbar-width: thin; scrollbar-color: #e2e8f0 transparent;
+    }
+    .sale-card {
+      flex: 0 0 auto; min-width: 190px; max-width: 210px;
+      background: #fff; border: 1px solid #e2e8f0; border-radius: 12px;
+      padding: 14px 16px; box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    }
+    .sale-card-name  { font-weight: 600; font-size: .85rem; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sale-card-cust  { font-size: .75rem; color: #64748b; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sale-card-row   { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+    .sale-card-qty   { font-size: .75rem; color: #64748b; }
+    .sale-card-total { font-weight: 700; font-size: .9rem; color: #16a34a; }
+    .sale-card-time  { font-size: .68rem; color: #94a3b8; margin-top: 6px; }
+
+    .btn-sell {
+      font-size: .8rem; padding: 4px 14px; border-radius: 6px; font-weight: 500;
+      background: #f0fdf4; color: #16a34a; border: 1.5px solid #86efac;
+      cursor: pointer; transition: all .12s; white-space: nowrap;
+    }
+    .btn-sell:hover { background: #16a34a; color: #fff; border-color: #16a34a; }
+
+    .empty-state {
+      text-align: center; padding: 64px 20px; color: #94a3b8;
+      font-size: .9rem; line-height: 1.8;
+    }
+    .empty-state i { font-size: 2.5rem; display: block; margin-bottom: 8px; opacity: .35; }
+
+    .field-invalid {
+      border-color: #f87171 !important;
+      background-color: #fff5f5 !important;
+      box-shadow: 0 0 0 3px rgba(248,113,113,.15) !important;
+    }
+
+    .dup-notice {
+      background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px;
+      padding: 10px 14px; font-size: .8rem; color: #92400e; line-height: 1.6;
+    }
+    .dup-notice i { color: #d97706; }
+    .dup-batches { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+    .dup-batch {
+      background: #fef3c7; border: 1px solid #fde68a; border-radius: 20px;
+      padding: 2px 10px; font-size: .72rem; color: #78350f; white-space: nowrap;
+    }
+
+    /* ── Modals ── */
+    .modal-content {
+      border: none; border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.14);
+    }
+    .modal-header { padding: 22px 24px 14px; border-bottom: none; }
+    .modal-body   { padding: 4px 24px 12px; }
+    .modal-footer { padding: 8px 24px 22px; border-top: none; gap: 8px; }
+    .modal-title  { font-size: 1.05rem; font-weight: 700; }
+    .modal-sub    { font-size: .8rem; color: #64748b; margin-top: 2px; }
+
+    .form-label { font-size: .85rem; font-weight: 500; margin-bottom: 4px; color: #374151; }
+    .form-control, .form-select {
+      border: 1.5px solid #e2e8f0; border-radius: 8px;
+      font-size: .9rem; padding: 8px 12px;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .form-control:focus, .form-select:focus {
+      border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,.1);
+    }
+    .input-group .input-group-text {
+      background: #f8fafc; border: 1.5px solid #e2e8f0; border-right: none;
+      border-radius: 8px 0 0 8px; color: #64748b; font-size: .9rem;
+    }
+    .input-group .form-control { border-left: none; border-radius: 0 8px 8px 0; }
+
+    /* Total display in sale modal */
+    .total-box {
+      background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+      border: 1.5px solid #86efac; border-radius: 10px;
+      padding: 14px 18px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .total-lbl { font-size: .85rem; color: #16a34a; font-weight: 500; }
+    .total-amt { font-size: 1.5rem; font-weight: 700; color: #15803d; }
+
+    /* ── Toast ── */
+    #toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+    .toast-msg {
+      min-width: 250px; padding: 11px 16px; border-radius: 10px; color: #fff;
+      font-weight: 500; font-size: .88rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,.15);
+      display: flex; align-items: center; gap: 8px;
+      animation: tslide .2s ease;
+    }
+    .t-success { background: #16a34a; }
+    .t-error   { background: #dc2626; }
+    @keyframes tslide { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ── Sort headers ── */
+    .th-sort { cursor: pointer; user-select: none; }
+    .th-sort:hover { background: #eff6ff !important; }
+    .th-sort-icon { font-size: .6rem; opacity: .3; margin-left: 4px; vertical-align: middle; }
+    .th-sort.asc .th-sort-icon, .th-sort.desc .th-sort-icon { opacity: 1; color: #2563eb; }
+
+    /* ── Pagination ── */
+    #paginationBar .pagination { gap: 2px; }
+    #paginationBar .page-link { font-size: .8rem; padding: 4px 10px; border-radius: 6px !important; color: #475569; border-color: #e2e8f0; }
+    #paginationBar .page-item.active .page-link { background: #2563eb; border-color: #2563eb; color: #fff; }
+    #paginationBar .page-item.disabled .page-link { opacity: .4; }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ──────────────────────────────────────────────────────────────── -->
+<header class="app-header">
+  <div class="brand">
+    <div class="brand-icon"><i class="bi bi-capsule-pill"></i></div>
+    <div>
+      <div class="brand-name">ABC Pharmacy</div>
+      <span class="brand-sub">Medicine Management System</span>
+    </div>
+  </div>
+  <nav class="nav-pills-custom">
+    <button class="npill active" data-tab="inventory">
+      <i class="bi bi-grid-3x3-gap-fill"></i> Inventory
+    </button>
+    <button class="npill" data-tab="sales">
+      <i class="bi bi-receipt"></i> Sales
+    </button>
+  </nav>
+</header>
+
+<div style="padding: 24px;">
+
+  <!-- ══════════════════════════════════════════════════════════════════════════
+       INVENTORY TAB
+  ═══════════════════════════════════════════════════════════════════════════ -->
+  <div id="tab-inventory">
+
+    <!-- Stat cards -->
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-lg-3">
+        <div class="stat-card">
+          <div class="stat-icon si-blue"><i class="bi bi-capsule-pill"></i></div>
+          <div><div class="stat-val" id="statTotal">—</div><div class="stat-lbl">Total Medicines</div></div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="stat-card">
+          <div class="stat-icon si-red"><i class="bi bi-hourglass-split"></i></div>
+          <div><div class="stat-val" id="statExpiring">—</div><div class="stat-lbl">Expiring &lt; 30 Days</div></div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="stat-card">
+          <div class="stat-icon si-amber"><i class="bi bi-exclamation-triangle-fill"></i></div>
+          <div><div class="stat-val" id="statLowStock">—</div><div class="stat-lbl">Low Stock (&lt; 10)</div></div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="stat-card stat-card-clickable" id="cardSalesToday" title="Click to view today's sales">
+          <div class="stat-icon si-green"><i class="bi bi-bag-check-fill"></i></div>
+          <div>
+            <div class="stat-val" id="statSalesToday">—</div>
+            <div class="stat-lbl">Sales Today <i class="bi bi-chevron-down ms-1" id="salesTodayChevron" style="font-size:.65rem;"></i></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Today's Sales cards -->
+    <div id="todaySalesSection" class="d-none mb-4">
+      <div class="d-flex align-items-center gap-2 mb-2">
+        <i class="bi bi-bag-check-fill text-success"></i>
+        <span class="fw-semibold" style="color:#1e293b">Today's Sales</span>
+        <span class="badge bg-success" id="todaySalesBadge">0</span>
+      </div>
+      <div class="today-sales-scroll" id="todaySalesCards"></div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar mb-3">
+      <div class="search-wrap">
+        <i class="bi bi-search search-icon"></i>
+        <input type="text" id="searchInput" class="search-input" placeholder="Search by medicine name or brand…" autocomplete="off" />
+        <button class="search-clear d-none" id="btnClearSearch" aria-label="Clear search">
+          <i class="bi bi-x-circle-fill"></i>
+        </button>
+      </div>
+      <button class="btn btn-primary px-3" id="btnOpenAddMed">
+        <i class="bi bi-plus-lg me-1"></i>Add Medicine
+      </button>
+    </div>
+
+    <!-- Status filters -->
+    <div class="filter-bar mb-3" id="filterBar">
+      <button class="fpill active"       data-filter="all">All</button>
+      <button class="fpill fpill-ok"     data-filter="ok">In Stock</button>
+      <button class="fpill fpill-stock"  data-filter="stock">Low Stock</button>
+      <button class="fpill fpill-expiry" data-filter="expiry">Expiring Soon</button>
+      <button class="fpill fpill-out"    data-filter="out">Out of Stock</button>
+    </div>
+
+    <!-- Medicine table -->
+    <div class="tbl-card">
+      <div class="table-responsive">
+        <table class="table" id="medicinesTable">
+          <thead>
+            <tr>
+              <th style="width:40px">#</th>
+              <th class="th-sort" data-sort="fullName">Medicine Name <i class="bi bi-chevron-expand th-sort-icon"></i></th>
+              <th class="th-sort" data-sort="brand">Brand <i class="bi bi-chevron-expand th-sort-icon"></i></th>
+              <th class="th-sort" data-sort="expiryDate">Expiry Date <i class="bi bi-chevron-expand th-sort-icon"></i></th>
+              <th class="th-sort" data-sort="quantity">Stock <i class="bi bi-chevron-expand th-sort-icon"></i></th>
+              <th class="th-sort" data-sort="price">Price <i class="bi bi-chevron-expand th-sort-icon"></i></th>
+              <th>Status</th>
+              <th style="width:80px"></th>
+            </tr>
+          </thead>
+          <tbody id="medicinesBody">
+            <tr><td colspan="8" class="empty-state"><i class="bi bi-arrow-clockwise"></i>Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div id="paginationBar" class="d-flex justify-content-end px-3 py-2"></div>
+    </div>
+
+  </div><!-- /tab-inventory -->
+
+  <!-- ══════════════════════════════════════════════════════════════════════════
+       SALES TAB
+  ═══════════════════════════════════════════════════════════════════════════ -->
+  <div id="tab-sales" class="d-none">
+
+    <!-- Revenue cards -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-4">
+        <div class="stat-card">
+          <div class="stat-icon si-green"><i class="bi bi-currency-rupee"></i></div>
+          <div><div class="stat-val" id="revenueTotal">—</div><div class="stat-lbl">Total Revenue</div></div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="stat-card">
+          <div class="stat-icon si-blue"><i class="bi bi-receipt"></i></div>
+          <div><div class="stat-val" id="salesTotalCount">—</div><div class="stat-lbl">Total Transactions</div></div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="stat-card">
+          <div class="stat-icon si-purple"><i class="bi bi-people-fill"></i></div>
+          <div><div class="stat-val" id="uniqueCustomers">—</div><div class="stat-lbl">Unique Customers</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <span class="fw-semibold text-slate-700">All Sale Records</span>
+      <button class="btn btn-success px-3" id="btnOpenSale">
+        <i class="bi bi-plus-lg me-1"></i>Record New Sale
+      </button>
+    </div>
+
+    <div class="tbl-card">
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th style="width:40px">#</th>
+              <th>Medicine</th>
+              <th>Customer</th>
+              <th>Qty</th>
+              <th>Unit Price</th>
+              <th>Total</th>
+              <th>Sale Date</th>
+            </tr>
+          </thead>
+          <tbody id="salesBody">
+            <tr><td colspan="7" class="empty-state"><i class="bi bi-arrow-clockwise"></i>Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /tab-sales -->
+
+</div><!-- /padding wrapper -->
+
+
+<!-- ══ ADD MEDICINE MODAL ═══════════════════════════════════════════════════ -->
+<div class="modal fade" id="addMedModal" tabindex="-1" aria-labelledby="addMedLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <h5 class="modal-title" id="addMedLabel">
+            <i class="bi bi-capsule-pill text-primary me-2"></i>Add New Medicine
+          </h5>
+          <div class="modal-sub">Fill in all required fields marked with *</div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="addAlert" class="mb-2"></div>
+        <form id="addMedicineForm" novalidate>
+          <div id="dupWarn" class="mb-2"></div>
+          <div class="row g-3">
+            <div class="col-md-8">
+              <label class="form-label">Full Name <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="fName" placeholder="e.g. Amoxicillin 500mg" required />
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Brand <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="fBrand" placeholder="e.g. GSK" required />
+            </div>
+            <div class="col-sm-4">
+              <label class="form-label">Expiry Date <span class="text-danger">*</span></label>
+              <input type="date" class="form-control" id="fExpiry" required />
+            </div>
+            <div class="col-sm-4">
+              <label class="form-label">Quantity <span class="text-danger">*</span></label>
+              <input type="number" class="form-control" id="fQty" placeholder="0" min="0" required />
+            </div>
+            <div class="col-sm-4">
+              <label class="form-label">Price <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text" data-currency>₹</span>
+                <input type="number" class="form-control" id="fPrice" placeholder="0.00" step="0.01" min="0" required />
+              </div>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Notes <span class="text-muted fw-normal">(optional)</span></label>
+              <textarea class="form-control" id="fNotes" rows="2" placeholder="Dosage instructions, storage requirements…"></textarea>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary px-4" id="btnSubmitMed" disabled>
+          <i class="bi bi-check-lg me-1"></i>Save Medicine
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ RECORD SALE MODAL ════════════════════════════════════════════════════ -->
+<div class="modal fade" id="saleModal" tabindex="-1" aria-labelledby="saleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" style="max-width: 480px;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <h5 class="modal-title" id="saleModalLabel">
+            <i class="bi bi-bag-check-fill text-success me-2"></i>Record a Sale
+          </h5>
+          <div class="modal-sub">Select a medicine and enter customer details</div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="saleAlert" class="mb-2"></div>
+        <form id="saleForm" novalidate>
+          <div class="mb-3">
+            <label class="form-label">Medicine <span class="text-danger">*</span></label>
+            <select class="form-select" id="sMedicine" required>
+              <option value="">— Select a medicine —</option>
+            </select>
+            <div class="form-text mt-1" id="stockHint"></div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Customer Name <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="sCustomer" placeholder="Enter customer name" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Quantity <span class="text-danger">*</span></label>
+            <input type="number" class="form-control" id="sQty" placeholder="1" min="1" required />
+          </div>
+          <div class="total-box">
+            <span class="total-lbl"><i class="bi bi-calculator me-1"></i>Total Amount</span>
+            <span class="total-amt" id="saleTotalAmt">0.00</span>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-success px-4" id="btnSubmitSale">
+          <i class="bi bi-check-lg me-1"></i>Confirm Sale
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

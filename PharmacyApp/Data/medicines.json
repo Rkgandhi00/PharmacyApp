@@ -1,0 +1,62 @@
+[
+  {
+    "id": "a1b2c3d4-0000-0000-0000-000000000001",
+    "fullName": "Amoxicillin 500mg",
+    "notes": "Broad-spectrum antibiotic. Refrigerate after opening.",
+    "expiryDate": "2026-07-05T00:00:00Z",
+    "quantity": 45,
+    "price": 8.99,
+    "brand": "GSK",
+    "createdAt": "2025-12-01T08:00:00Z"
+  },
+  {
+    "id": "a1b2c3d4-0000-0000-0000-000000000002",
+    "fullName": "Paracetamol 500mg",
+    "notes": "Pain reliever and fever reducer. Max 8 tablets per day.",
+    "expiryDate": "2027-11-30T00:00:00Z",
+    "quantity": 7,
+    "price": 2.50,
+    "brand": "Boots",
+    "createdAt": "2025-12-01T08:00:00Z"
+  },
+  {
+    "id": "a1b2c3d4-0000-0000-0000-000000000003",
+    "fullName": "Ibuprofen 400mg",
+    "notes": "Non-steroidal anti-inflammatory. Take with food.",
+    "expiryDate": "2027-08-15T00:00:00Z",
+    "quantity": 120,
+    "price": 3.75,
+    "brand": "Nurofen",
+    "createdAt": "2025-12-01T08:00:00Z"
+  },
+  {
+    "id": "a1b2c3d4-0000-0000-0000-000000000004",
+    "fullName": "Loratadine 10mg",
+    "notes": "Non-drowsy antihistamine for allergy relief.",
+    "expiryDate": "2028-03-20T00:00:00Z",
+    "quantity": 30,
+    "price": 5.49,
+    "brand": "Clarityn",
+    "createdAt": "2025-12-01T08:00:00Z"
+  },
+  {
+    "id": "a1b2c3d4-0000-0000-0000-000000000005",
+    "fullName": "Omeprazole 20mg",
+    "notes": "Proton pump inhibitor for acid reflux.",
+    "expiryDate": "2026-07-12T00:00:00Z",
+    "quantity": 60,
+    "price": 6.99,
+    "brand": "Prilosec",
+    "createdAt": "2025-12-01T08:00:00Z"
+  },
+  {
+    "id": "a1b2c3d4-0000-0000-0000-000000000006",
+    "fullName": "Metformin 500mg",
+    "notes": "Type 2 diabetes management. Take with meals.",
+    "expiryDate": "2028-06-01T00:00:00Z",
+    "quantity": 9,
+    "price": 4.25,
+    "brand": "Glucophage",
+    "createdAt": "2025-12-01T08:00:00Z"
+  }
+]
