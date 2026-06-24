@@ -3,6 +3,12 @@ bin/
 obj/
 publish/
 
+## Frontend
+pharmacy-ui/node_modules/
+pharmacy-ui/dist/
+PharmacyApp/wwwroot/assets/
+PharmacyApp/wwwroot/index.html
+
 ## IDE files
 .vs/
 *.user
