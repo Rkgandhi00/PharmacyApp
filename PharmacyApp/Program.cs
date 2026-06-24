@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Mvc;
 using PharmacyApp.Infrastructure;
 using PharmacyApp.Repositories;
 using PharmacyApp.Repositories.Json;
@@ -13,6 +15,23 @@ builder.Services.AddSingleton<IStockTransactionRepository, JsonStockTransactionR
 builder.Services.AddSingleton<IStockService, StockService>();
 
 var app = builder.Build();
+
+app.UseExceptionHandler(errorApp => errorApp.Run(async context =>
+{
+    var error = context.Features.Get<IExceptionHandlerFeature>()?.Error;
+    var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+    logger.LogError(error, "Unhandled exception on {Method} {Path}", context.Request.Method, context.Request.Path);
+
+    context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+    context.Response.ContentType = "application/problem+json";
+    await context.Response.WriteAsJsonAsync(new ProblemDetails
+    {
+        Status  = StatusCodes.Status500InternalServerError,
+        Title   = "An unexpected error occurred.",
+        Detail  = error?.Message ?? "Please try again or contact support."
+    });
+}));
+
 app.UseStaticFiles();
 app.MapControllers();
 app.MapGet("/api/config", (IConfiguration cfg) => new

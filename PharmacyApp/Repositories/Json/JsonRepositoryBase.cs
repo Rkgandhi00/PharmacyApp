@@ -25,10 +25,33 @@ public abstract class JsonRepositoryBase<T>
     }
 
     /// <summary>Deserialises the full collection from disk. Caller must hold <see cref="LockSync"/>.</summary>
-    protected List<T> ReadAll() =>
-        JsonSerializer.Deserialize<List<T>>(File.ReadAllText(_path), JsonOptions.Default) ?? [];
+    protected List<T> ReadAll()
+    {
+        try
+        {
+            return JsonSerializer.Deserialize<List<T>>(File.ReadAllText(_path), JsonOptions.Default) ?? [];
+        }
+        catch (JsonException ex)
+        {
+            throw new InvalidOperationException(
+                $"Data file '{Path.GetFileName(_path)}' contains invalid JSON. Delete or repair the file to recover.", ex);
+        }
+        catch (IOException ex)
+        {
+            throw new InvalidOperationException($"Failed to read data file '{Path.GetFileName(_path)}'.", ex);
+        }
+    }
 
     /// <summary>Serialises <paramref name="items"/> and overwrites the file. Caller must hold <see cref="LockSync"/>.</summary>
-    protected void WriteAll(List<T> items) =>
-        File.WriteAllText(_path, JsonSerializer.Serialize(items, JsonOptions.Default));
+    protected void WriteAll(List<T> items)
+    {
+        try
+        {
+            File.WriteAllText(_path, JsonSerializer.Serialize(items, JsonOptions.Default));
+        }
+        catch (IOException ex)
+        {
+            throw new InvalidOperationException($"Failed to write data file '{Path.GetFileName(_path)}'.", ex);
+        }
+    }
 }
